@@ -1,8 +1,7 @@
+import { sendBirthdayEmail } from "@/lib/emailService";
 import { prisma } from "@/lib/prisma";
-import { RenderingService } from "@/services/rendering.service";
-import { sendBirthdayEmail } from "./emailService";
+import { renderHtmlToImage } from "@/lib/renderHtmlToImage";
 import { EmailLogService } from "@/services/email-log.service";
-import { renderHtmlToImage } from "./renderHtmlToImage";
 
 export async function processTodaysBirthdays() {
   const today = new Date();
