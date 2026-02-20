@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum BirthdayStatus {
+  PENDING_GENERATION
+  GENERATING
+  READY_FOR_APPROVAL
+  APPROVED
+  SENT
+  FAILED
+}
+
+model Employee {
+  id             String   @id @default(uuid())
+  name           String
+  email          String   @unique
+  birthdayMonth  Int
+  birthdayDay    Int
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  birthdayEvents BirthdayEvent[]
+}
+
+model BirthdayEvent {
+  id            String   @id @default(uuid())
+
+  employeeId    String
+  employee      Employee @relation(fields: [employeeId], references: [id])
+
+  year          Int
+  status        BirthdayStatus
+
+  layoutJson    Json?
+  htmlContent   String?
+
+  approvedAt    DateTime?
+  sentAt        DateTime?
+
+  errorMessage  String?
+  createdAt     DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  generationLog GenerationLog?
+  emailLogs     EmailLog[]
+
+  @@unique([employeeId, year])
+}
+
+model GenerationLog {
+  id              String @id @default(uuid())
+
+  birthdayEventId String @unique
+  birthdayEvent   BirthdayEvent @relation(fields: [birthdayEventId], references: [id])
+
+  tokensUsed      Int
+  imageCost       Float
+  totalCost       Float
+
+  createdAt       DateTime @default(now())
+}
+
+model EmailLog {
+  id              String @id @default(uuid())
+
+  birthdayEventId String
+  birthdayEvent   BirthdayEvent @relation(fields: [birthdayEventId], references: [id])
+
+  status          String
+  sentAt          DateTime?
+
+  createdAt       DateTime @default(now())
+}
