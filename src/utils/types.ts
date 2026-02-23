@@ -7,6 +7,14 @@ export enum BirthdayStatus {
   FAILED,
 }
 
+export const BirthdayStatusLabels: Record<string, string> = {
+  PENDING_GENERATION: "Pending Generation",
+  GENERATING: "Generating",
+  READY_FOR_APPROVAL: "Ready for Approval",
+  APPROVED: "Approved",
+  SENT: "Sent",
+  FAILED: "Failed",
+};
 export type TEmployee = {
   id: string;
   name: string;
@@ -21,6 +29,7 @@ export type TBirthdayEvent = {
   employeeId: string;
   status: BirthdayStatus;
   year: number;
+  dateOfBirth: Date;
   createdAt: Date;
   employee: TEmployee;
   senderEmail: string;

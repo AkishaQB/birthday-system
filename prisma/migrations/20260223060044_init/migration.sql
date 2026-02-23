@@ -2,11 +2,25 @@
 CREATE TYPE "BirthdayStatus" AS ENUM ('PENDING_GENERATION', 'GENERATING', 'READY_FOR_APPROVAL', 'APPROVED', 'SENT', 'FAILED');
 
 -- CreateTable
+CREATE TABLE "Employee" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "birthdayMonth" INTEGER NOT NULL,
+    "birthdayDay" INTEGER NOT NULL,
+    "active" BOOLEAN NOT NULL DEFAULT true,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Employee_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "BirthdayEvent" (
     "id" TEXT NOT NULL,
     "employeeId" TEXT NOT NULL,
     "year" INTEGER NOT NULL,
     "status" "BirthdayStatus" NOT NULL,
+    "dateOfBirth" TIMESTAMP(3) NOT NULL,
     "layoutJson" JSONB,
     "htmlContent" TEXT,
     "approvedAt" TIMESTAMP(3),
@@ -35,12 +49,14 @@ CREATE TABLE "EmailLog" (
     "id" TEXT NOT NULL,
     "birthdayEventId" TEXT NOT NULL,
     "status" TEXT NOT NULL,
-    "providerResponse" JSONB,
     "sentAt" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "EmailLog_pkey" PRIMARY KEY ("id")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Employee_email_key" ON "Employee"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "BirthdayEvent_employeeId_year_key" ON "BirthdayEvent"("employeeId", "year");

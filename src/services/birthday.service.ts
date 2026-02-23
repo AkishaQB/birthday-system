@@ -1,6 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { BirthdayStatus, CreateEventsResponse } from "@/utils/types";
-import { BirthdayEvent, PrismaClient } from "@prisma/client";
+import { BirthdayEvent } from "@prisma/client";
 
 export class BirthdayService {
   static async createUpcomingEvents() {
@@ -24,6 +23,14 @@ export class BirthdayService {
           data: {
             employeeId: birthday.id,
             status: "PENDING_GENERATION",
+            dateOfBirth: new Date(
+              targetDate.getFullYear(),
+              birthday.birthdayMonth - 1,
+              birthday.birthdayDay,
+              0,
+              0,
+              0,
+            ),
             year: targetDate.getFullYear(),
           },
         }),

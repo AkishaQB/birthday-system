@@ -13,7 +13,8 @@ export function startCreateScheduler() {
   cron.schedule("* * * * *", async () => {
     console.log("Running birthday cron...");
 
-    await BirthdayService.createUpcomingEvents();
+    const events = await BirthdayService.createUpcomingEvents();
+    console.log("Events created:", events);
     await BirthdayGenerationService.generateBirthdayCards();
   });
 }
