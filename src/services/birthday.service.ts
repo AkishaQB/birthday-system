@@ -1,42 +1,63 @@
 import { prisma } from "@/lib/prisma";
-import { BirthdayEvent } from "@prisma/client";
 
 export class BirthdayService {
   static async createUpcomingEvents() {
     const currentDate = new Date();
-    const targetDate = new Date(
-      currentDate.getTime() + 2 * 24 * 60 * 60 * 1000,
-    );
-    console.log("Target date for birthday events:", targetDate.getMonth());
+    const targetDate = new Date(currentDate);
+    targetDate.setDate(currentDate.getDate() + 2);
+    targetDate.setHours(0, 0, 0, 0);
+
     const upcomingBirthdays = await prisma.employee.findMany({
       where: {
         birthdayMonth: targetDate.getMonth() + 1, // getMonth is 0-indexed
         birthdayDay: targetDate.getDate(),
       },
     });
-    const eventPromise: Promise<BirthdayEvent>[] = [];
-    console.log("upcomingBirthdays", upcomingBirthdays);
 
-    for (const birthday of upcomingBirthdays) {
-      eventPromise.push(
+    const currentYear = targetDate.getFullYear();
+
+    // Idempotency check: Ensure we don't create duplicates for this year
+    const existingEvents = await prisma.birthdayEvent.findMany({
+      where: {
+        year: currentYear,
+        employeeId: { in: upcomingBirthdays.map((e) => e.id) },
+      },
+      select: { employeeId: true },
+    });
+
+    const existingEmployeeIds = new Set(
+      existingEvents.map((e) => e.employeeId),
+    );
+    const eventsToCreate = upcomingBirthdays.filter(
+      (e) => !existingEmployeeIds.has(e.id),
+    );
+
+    const results = await Promise.allSettled(
+      eventsToCreate.map((birthday) =>
         prisma.birthdayEvent.create({
           data: {
             employeeId: birthday.id,
             status: "PENDING_GENERATION",
             dateOfBirth: new Date(
-              targetDate.getFullYear(),
+              currentYear,
               birthday.birthdayMonth - 1,
               birthday.birthdayDay,
-              0,
-              0,
-              0,
             ),
-            year: targetDate.getFullYear(),
+            year: currentYear,
           },
         }),
+      ),
+    );
+
+    const failed = results.filter((r) => r.status === "rejected");
+    if (failed.length > 0) {
+      console.error(
+        `Failed to create ${failed.length} birthday events:`,
+        failed.map((r) => (r as PromiseRejectedResult).reason),
       );
     }
-    return Promise.allSettled(eventPromise);
+
+    return results;
   }
   static async getReadyForApproval() {
     return prisma.birthdayEvent.findMany({
@@ -91,12 +112,13 @@ export class BirthdayService {
     });
   }
   static async getApprovedEvents() {
+    const today = new Date();
     return prisma.birthdayEvent.findMany({
       where: {
         status: "APPROVED",
         employee: {
-          birthdayMonth: new Date().getMonth() + 1,
-          birthdayDay: new Date().getDate(),
+          birthdayMonth: today.getMonth() + 1,
+          birthdayDay: today.getDate(),
         },
       },
       include: {
