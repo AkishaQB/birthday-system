@@ -19,7 +19,7 @@ export default function BirthdayAdminPage() {
   const previewCard = (event: TBirthdayEvent) => {
     setSelectedEvent(event);
   };
-
+  console.log("events", events);
   const pendingApprovalColumns: ColumnDef<TBirthdayEvent>[] = [
     { accessorKey: "employee.name", header: "Employee" },
     {
@@ -159,7 +159,7 @@ export default function BirthdayAdminPage() {
         )}
       </div>
 
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 }

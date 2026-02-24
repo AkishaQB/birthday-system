@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { startSendScheduler } from "@/scheduler/sendScheduler";
-import { startCreateScheduler } from "@/scheduler/createScheduler";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,10 +22,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  if (process.env.NODE_ENV !== "production") {
-    startCreateScheduler();
-    startSendScheduler();
-  }
   return (
     <html lang="en">
       <body

@@ -13,7 +13,7 @@ export class BirthdayService {
         birthdayDay: targetDate.getDate(),
       },
     });
-
+    console.log("upcomingBirthdays", upcomingBirthdays);
     const currentYear = targetDate.getFullYear();
 
     // Idempotency check: Ensure we don't create duplicates for this year
@@ -31,6 +31,7 @@ export class BirthdayService {
     const eventsToCreate = upcomingBirthdays.filter(
       (e) => !existingEmployeeIds.has(e.id),
     );
+    console.log("eventsToCreate", eventsToCreate);
 
     const results = await Promise.allSettled(
       eventsToCreate.map((birthday) =>
